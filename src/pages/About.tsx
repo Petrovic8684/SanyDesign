@@ -1,18 +1,31 @@
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
+
+interface Tool {
+  id: number | undefined;
+  name: string;
+  emoji: string;
+  url: string;
+}
 
 const About = () => {
-  const dummyTools = [
-    { name: "Adobe Illustrator", emoji: "🖌️", url: "" },
-    { name: "Photoshop", emoji: "📸", url: "" },
-    { name: "Figma", emoji: "🎨", url: "" },
-    { name: "Sketch", emoji: "✏️", url: "" },
-    { name: "After Effects", emoji: "🎬", url: "" },
-    { name: "InDesign", emoji: "📑", url: "" },
-    { name: "Blender", emoji: "🔮", url: "" },
-    { name: "Procreate", emoji: "🖍️", url: "" },
-  ];
+  const [tools, setTools] = useState<Tool[]>([]);
+
+  useEffect(() => {
+    fetchTools();
+  }, []);
+
+  const fetchTools = async () => {
+    try {
+      const result = await api.get(`/tools`);
+      setTools(result.data);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to get tools.");
+    }
+  };
 
   return (
     <div className="bg-rose-50 flex flex-col">
@@ -58,9 +71,9 @@ const About = () => {
               Tools I Work With
             </h2>
             <ul className="flex flex-wrap justify-center gap-8 mt-8 text-base md:text-lg text-indigo-950">
-              {dummyTools.map((tool, index) => (
+              {tools.map((tool) => (
                 <li
-                  key={index}
+                  key={tool.id}
                   className="hover:text-indigo-700 cursor-pointer"
                 >
                   <Link to={tool.url} className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
 
 interface ProjectModalProps {
   onClose: () => void;
@@ -8,6 +9,7 @@ interface ProjectModalProps {
 }
 
 interface ProjectFormData {
+  id: number | undefined;
   coverImg: string;
   title: string;
   images: string[];
@@ -23,13 +25,15 @@ const ProjectModal = ({
   toolsList,
 }: ProjectModalProps) => {
   const [coverImg, setCoverImg] = useState<string>("");
-  //const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [title, setTitle] = useState<string>("");
   const [images, setImages] = useState<string[]>([]);
-  //const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [coverImgFile, setCoverImgFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [tools, setTools] = useState<string[]>([]);
   const [liveUrl, setLiveUrl] = useState<string>("");
+
+  const id = initialData?.id;
 
   useEffect(() => {
     if (initialData) {
@@ -42,13 +46,30 @@ const ProjectModal = ({
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    let coverImgUrl = "";
+    let imagesUrls: string[] = [];
+
+    if (coverImgFile) {
+      coverImgUrl = await uploadToCloudinary(coverImgFile);
+    } else {
+      coverImgUrl = coverImg; // Use the initial cover image if not updated
+    }
+
+    if (imageFiles.length > 0) {
+      const uploadPromises = imageFiles.map((file) => uploadToCloudinary(file));
+      imagesUrls = await Promise.all(uploadPromises);
+    } else {
+      imagesUrls = images; // Use the initial images if not updated
+    }
+
     onSubmit({
-      coverImg,
+      id,
+      coverImg: coverImgUrl,
       title,
-      images,
+      images: imagesUrls,
       description,
       tools,
       liveUrl,
@@ -60,18 +81,14 @@ const ProjectModal = ({
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      //setCoverFile(file);
-      setCoverImg(URL.createObjectURL(file));
+      setCoverImgFile(file);
     }
   };
 
   const handleImageFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const fileArray = Array.from(files);
-      //setImageFiles(fileArray);
-      const urls = fileArray.map((file) => URL.createObjectURL(file));
-      setImages(urls);
+      setImageFiles(Array.from(files));
     }
   };
 
@@ -99,7 +116,7 @@ const ProjectModal = ({
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-indigo-950 text-2xl"
+          className="absolute top-3 right-3 text-indigo-950 text-2xl cursor-pointer"
         >
           ×
         </button>
@@ -116,50 +133,56 @@ const ProjectModal = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Project Title"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
 
-          {/* Cover Image */}
-          <div>
-            <label className="block mb-2 font-semibold">Cover Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleCoverFileChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            {coverImg && (
-              <img
-                src={coverImg}
-                alt="Cover Preview"
-                className="w-full h-40 object-cover rounded-md mt-2"
+          {/* Only show Cover Image input when adding a new project */}
+          {!initialData && (
+            <div>
+              <label className="block mb-2 font-semibold">Cover Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverFileChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800 cursor-pointer"
+                required
               />
-            )}
-          </div>
-
-          {/* Images */}
-          <div>
-            <label className="block mb-2 font-semibold">Images</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageFilesChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-            <div className="flex flex-wrap gap-2 mt-2">
-              {images.map((img, index) => (
+              {coverImgFile && (
                 <img
-                  key={index}
-                  src={img}
-                  alt={`Image ${index + 1}`}
-                  className="w-16 h-16 object-cover rounded-md"
+                  src={URL.createObjectURL(coverImgFile)}
+                  alt="Cover Preview"
+                  className="w-full h-40 object-cover rounded-md mt-2"
                 />
-              ))}
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Only show Images input when adding a new project */}
+          {!initialData && (
+            <div>
+              <label className="block mb-2 font-semibold">Images</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageFilesChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800 cursor-pointer"
+                required
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {imageFiles.map((file, index) => (
+                  <img
+                    key={index}
+                    src={URL.createObjectURL(file)}
+                    alt={`Image ${index + 1}`}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div>
@@ -167,7 +190,7 @@ const ProjectModal = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Project Description"
-              className="w-full p-3 border border-gray-300 rounded-md resize-none overflow-y-scroll"
+              className="w-full p-3 border border-gray-300 rounded-md resize-none overflow-y-scroll focus:outline-none focus:ring-2 focus:ring-indigo-800"
               rows={4}
               required
             />
@@ -181,7 +204,7 @@ const ProjectModal = ({
                 <select
                   value={tool}
                   onChange={(e) => handleToolSelect(e, index)}
-                  className="flex-1 p-2 border border-gray-300 rounded-md"
+                  className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
                 >
                   {toolsList.map((toolOption, idx) => (
                     <option key={idx} value={toolOption}>
@@ -192,7 +215,7 @@ const ProjectModal = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveTool(index)}
-                  className="ml-2 text-red-600"
+                  className="ml-2 text-red-600 cursor-pointer"
                 >
                   ×
                 </button>
@@ -201,7 +224,7 @@ const ProjectModal = ({
             <button
               type="button"
               onClick={handleAddTool}
-              className="text-indigo-600 mt-2"
+              className="text-indigo-600 mt-2 cursor-pointer"
             >
               + Add Tool
             </button>
@@ -214,13 +237,14 @@ const ProjectModal = ({
               value={liveUrl}
               onChange={(e) => setLiveUrl(e.target.value)}
               placeholder="Live Project URL"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
+              required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md"
+            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
           >
             Submit
           </button>

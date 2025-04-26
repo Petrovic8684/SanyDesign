@@ -7,6 +7,7 @@ interface ToolModalProps {
 }
 
 interface ToolFormData {
+  id: number | undefined;
   name: string;
   emoji: string;
   url: string;
@@ -16,6 +17,8 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
   const [url, setUrl] = useState("");
+
+  const id = initialData?.id;
 
   useEffect(() => {
     if (initialData) {
@@ -27,7 +30,7 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({ name, emoji, url });
+    onSubmit({ id, name, emoji, url });
     onClose();
   };
 
@@ -36,7 +39,7 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-indigo-950 text-2xl"
+          className="absolute top-3 right-3 text-indigo-950 text-2xl cursor-pointer"
         >
           ×
         </button>
@@ -52,7 +55,7 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tool Name"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
@@ -63,7 +66,7 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
               placeholder="Emoji (e.g. 🎨)"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
@@ -74,14 +77,14 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="Tool URL"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md"
+            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
           >
             Submit
           </button>

@@ -2,58 +2,11 @@ import { useEffect, useState } from "react";
 import ProjectModal from "../components/admin/ProjectModal";
 import ToolModal from "../components/admin/ToolModal";
 import ServiceModal from "../components/admin/ServiceModal";
-
-const dummyProjects = [
-  {
-    id: 1,
-    coverImg: "/assets/landing/2.png",
-    title: "Project One",
-    images: ["/assets/project/1.png", "/assets/project/2.png"],
-    description: "Short project description here.",
-    tools: ["Figma", "Photoshop", "Illustrator"],
-    liveUrl: "https://example.com",
-  },
-  {
-    id: 2,
-    coverImg: "/assets/landing/3.png",
-    title: "Project Two",
-    images: ["/assets/project/1.png", "/assets/project/2.png"],
-    description: "Another project description here.",
-    tools: ["Figma", "Photoshop", "Illustrator"],
-    liveUrl: "https://example.com",
-  },
-];
-
-const dummyTools = [
-  {
-    name: "Illustrator",
-    emoji: "🖌️",
-    url: "https://www.adobe.com/products/illustrator.html",
-  },
-  {
-    name: "Photoshop",
-    emoji: "📸",
-    url: "https://www.adobe.com/products/photoshop.html",
-  },
-  { name: "Figma", emoji: "🎨", url: "https://www.figma.com/" },
-];
-
-const dummyServices = [
-  {
-    name: "Branding",
-    description:
-      "Helping businesses build their identity, from logos to brand guidelines.",
-    price: "Starting at $1000",
-  },
-  {
-    name: "Web Design",
-    description:
-      "Crafting user-friendly and visually appealing websites tailored to your needs.",
-    price: "Starting at $1500",
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { api } from "../lib/api";
 
 interface Project {
+  id: number | undefined;
   coverImg: string;
   title: string;
   images: string[];
@@ -63,27 +16,33 @@ interface Project {
 }
 
 interface Tool {
+  id: number | undefined;
   name: string;
   emoji: string;
   url: string;
 }
 
 interface Service {
+  id: number | undefined;
   name: string;
   description: string;
   price: string;
 }
 
 const AdminPanel = () => {
-  const [projects, setProjects] = useState<Project[]>(dummyProjects);
-  const [tools, setTools] = useState<Tool[]>(dummyTools);
-  const [services, setServices] = useState<Service[]>(dummyServices);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showToolModal, setShowToolModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [currentService, setCurrentService] = useState<Service | null>(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (showProjectModal || showToolModal || showServiceModal) {
@@ -97,49 +56,132 @@ const AdminPanel = () => {
     };
   }, [showProjectModal, showToolModal, showServiceModal]);
 
-  const handleAddProject = (data: Project) => {
-    setProjects([...projects, data]);
+  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    try {
+      const [projectsResponse, toolsResponse, servicesResponse] =
+        await Promise.all([
+          api.get("/projects"),
+          api.get("/tools"),
+          api.get("/services"),
+        ]);
+
+      setProjects(projectsResponse.data);
+      setTools(toolsResponse.data);
+      setServices(servicesResponse.data);
+    } catch (err: any) {
+      if (err.response) {
+        console.error(
+          err.response.data.message || "An error occurred while fetching data."
+        );
+      }
+    }
   };
 
-  const handleEditProject = (data: Project) => {
-    const updatedProjects = projects.map((project) =>
-      project.title === currentProject?.title ? data : project
-    );
-    setProjects(updatedProjects);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
-  const handleDeleteProject = (title: string) => {
-    setProjects(projects.filter((project) => project.title !== title));
+  const handleAddProject = async (data: Project) => {
+    try {
+      const response = await api.post("/projects", data);
+      setProjects([...projects, response.data]);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to add project.");
+    }
   };
 
-  const handleAddTool = (data: Tool) => {
-    setTools([...tools, data]);
+  const handleEditProject = async (data: Project) => {
+    if (!currentProject || currentProject.id === undefined) return;
+
+    try {
+      const response = await api.patch(`/projects/${currentProject.id}`, data);
+      const updatedProjects = projects.map((project) =>
+        project.id === currentProject.id ? response.data : project
+      );
+      setProjects(updatedProjects);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to edit project.");
+    }
   };
 
-  const handleEditTool = (data: Tool) => {
-    const updatedTools = tools.map((tool) =>
-      tool.name === currentTool?.name ? data : tool
-    );
-    setTools(updatedTools);
+  const handleDeleteProject = async (id: number | undefined) => {
+    if (id === undefined) return;
+
+    try {
+      await api.delete(`/projects/${id}`);
+      setProjects(projects.filter((project) => project.id !== id));
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to delete project.");
+    }
   };
 
-  const handleDeleteTool = (name: string) => {
-    setTools(tools.filter((tool) => tool.name !== name));
+  const handleAddTool = async (data: Tool) => {
+    try {
+      const response = await api.post("/tools", data);
+      setTools([...tools, response.data]);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to add tool.");
+    }
   };
 
-  const handleAddService = (data: Service) => {
-    setServices([...services, data]);
+  const handleEditTool = async (data: Tool) => {
+    if (!currentTool) return;
+
+    try {
+      const response = await api.patch(`/tools/${currentTool.id}`, data);
+      const updatedTools = tools.map((tool) =>
+        tool.id === currentTool.id ? response.data : tool
+      );
+      setTools(updatedTools);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to edit tool.");
+    }
   };
 
-  const handleEditService = (data: Service) => {
-    const updatedServices = services.map((service) =>
-      service.name === currentService?.name ? data : service
-    );
-    setServices(updatedServices);
+  const handleDeleteTool = async (id: number | undefined) => {
+    try {
+      await api.delete(`/tools/${id}`);
+      setTools(tools.filter((tool) => tool.id !== id));
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to delete tool.");
+    }
   };
 
-  const handleDeleteService = (name: string) => {
-    setServices(services.filter((service) => service.name !== name));
+  const handleAddService = async (data: Service) => {
+    try {
+      const response = await api.post("/services", data);
+      setServices([...services, response.data]);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to add service.");
+    }
+  };
+
+  const handleEditService = async (data: Service) => {
+    if (!currentService) return;
+
+    try {
+      const response = await api.patch(`/services/${currentService.id}`, data);
+      const updatedServices = services.map((service) =>
+        service.id === currentService.id ? response.data : service
+      );
+      setServices(updatedServices);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to edit service.");
+    }
+  };
+
+  const handleDeleteService = async (id: number | undefined) => {
+    if (id === undefined) return;
+
+    try {
+      await api.delete(`/services/${id}`);
+      setServices(services.filter((service) => service.id !== id));
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to delete service.");
+    }
   };
 
   return (
@@ -213,13 +255,13 @@ const AdminPanel = () => {
                           setCurrentProject(project);
                           setShowProjectModal(true);
                         }}
-                        className="text-indigo-600"
+                        className="text-indigo-600 cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteProject(project.title)}
-                        className="text-red-600"
+                        onClick={() => handleDeleteProject(project.id)}
+                        className="text-red-600 cursor-pointer"
                       >
                         Delete
                       </button>
@@ -235,7 +277,7 @@ const AdminPanel = () => {
               setCurrentProject(null);
               setShowProjectModal(true);
             }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6"
+            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
           >
             Add Project
           </button>
@@ -248,8 +290,8 @@ const AdminPanel = () => {
             <table className="w-max md:min-w-full table-auto">
               <thead className="bg-indigo-950 text-white">
                 <tr>
-                  <th className="p-3 text-left">Emoji</th>
                   <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Emoji</th>
                   <th className="p-3 text-left">URL</th>
                   <th className="p-3 text-left">Actions</th>
                 </tr>
@@ -257,8 +299,8 @@ const AdminPanel = () => {
               <tbody>
                 {tools.map((tool, index) => (
                   <tr key={index} className="border-b">
-                    <td className="p-3 text-2xl">{tool.emoji}</td>
                     <td className="p-3">{tool.name}</td>
+                    <td className="p-3 text-2xl">{tool.emoji}</td>
                     <td className="p-3">
                       <a
                         href={tool.url}
@@ -275,13 +317,13 @@ const AdminPanel = () => {
                           setCurrentTool(tool);
                           setShowToolModal(true);
                         }}
-                        className="text-indigo-600"
+                        className="text-indigo-600 cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteTool(tool.name)}
-                        className="text-red-600"
+                        onClick={() => handleDeleteTool(tool.id)}
+                        className="text-red-600 cursor-pointer"
                       >
                         Delete
                       </button>
@@ -297,13 +339,13 @@ const AdminPanel = () => {
               setCurrentTool(null);
               setShowToolModal(true);
             }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6"
+            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
           >
             Add Tool
           </button>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-4">
           <h2 className="text-2xl font-semibold text-indigo-950 mb-4">
             Services
           </h2>
@@ -330,13 +372,13 @@ const AdminPanel = () => {
                           setCurrentService(service);
                           setShowServiceModal(true);
                         }}
-                        className="text-indigo-600"
+                        className="text-indigo-600 cursor-pointer"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteService(service.name)}
-                        className="text-red-600"
+                        onClick={() => handleDeleteService(service.id)}
+                        className="text-red-600 cursor-pointer"
                       >
                         Delete
                       </button>
@@ -352,11 +394,18 @@ const AdminPanel = () => {
               setCurrentService(null);
               setShowServiceModal(true);
             }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6"
+            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
           >
             Add Service
           </button>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="text-indigo-800 cursor-pointer mt-12 ml-1"
+        >
+          LOGOUT
+        </button>
 
         {showProjectModal && (
           <ProjectModal

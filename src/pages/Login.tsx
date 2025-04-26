@@ -1,12 +1,28 @@
 import { useState } from "react";
+import { api } from "../lib/api";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: any) => {
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: any) => {
     e.preventDefault();
-    console.log("Logged in with", username, password);
+    try {
+      const response = await api.post("/auth/login", { username, password });
+      const { token } = response.data;
+
+      localStorage.setItem("token", token);
+
+      navigate("/admin");
+    } catch (err: any) {
+      if (err.response) {
+        setError(err.response.data.message || "An error occurred.");
+      }
+    }
   };
 
   return (
@@ -45,9 +61,13 @@ const Login = () => {
             />
           </div>
 
+          {error && (
+            <div className="mb-4 text-red-600 font-medium">{error}</div>
+          )}
+
           <button
             type="submit"
-            className="w-full py-3 mt-4 text-white bg-indigo-950 rounded-md"
+            className="w-full py-3 mt-4 text-white bg-indigo-950 rounded-md cursor-pointer"
           >
             Login
           </button>

@@ -1,39 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { api } from "../lib/api";
+
+interface Project {
+  id: number | undefined;
+  coverImg: string;
+  title: string;
+  images: string[];
+  description: string;
+  tools: string[];
+  liveUrl: string;
+}
 
 const Project = () => {
   const { id } = useParams<{ id: string }>();
-  console.log(id);
-
-  const project = {
-    title: "Project One",
-    images: [
-      "/assets/project/1.png",
-      "/assets/project/2.png",
-      "/assets/project/3.png",
-    ],
-    description:
-      "This project is a creative exploration of modern design principles, focusing on user engagement and visual storytelling. The aim was to create a seamless experience that blends aesthetics with functionality.",
-    tools: ["Figma", "Photoshop", "Illustrator"],
-    liveUrl: "https://example.com",
-  };
-
+  const [project, setProject] = useState<Project | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
 
+  useEffect(() => {
+    fetchProject();
+  }, [id]);
+
+  const fetchProject = async () => {
+    try {
+      const result = await api.get(`/projects/${id}`);
+      setProject(result.data);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to get project.");
+    }
+  };
+
   const prevImage = () => {
+    if (!project) return;
     setCurrentImage((prev) =>
       prev === 0 ? project.images.length - 1 : prev - 1
     );
   };
 
   const nextImage = () => {
+    if (!project) return;
     setCurrentImage((prev) =>
       prev === project.images.length - 1 ? 0 : prev + 1
     );
   };
+
+  if (!project) {
+    return (
+      <div className="bg-rose-50 flex flex-col min-h-screen">
+        <Navbar active="" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-rose-50 flex flex-col min-h-screen">
@@ -54,14 +74,14 @@ const Project = () => {
 
             <button
               onClick={prevImage}
-              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg"
+              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
             >
               <HiChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
             </button>
 
             <button
               onClick={nextImage}
-              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg"
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
             >
               <HiChevronRight className="w-6 h-6 md:w-8 md:h-8" />
             </button>

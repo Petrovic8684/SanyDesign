@@ -7,6 +7,7 @@ interface ServiceModalProps {
 }
 
 interface ServiceFormData {
+  id: number | undefined;
   name: string;
   description: string;
   price: string;
@@ -21,6 +22,8 @@ const ServiceModal = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
 
+  const id = initialData?.id;
+
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
@@ -31,7 +34,7 @@ const ServiceModal = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({ name, description, price });
+    onSubmit({ id, name, description, price });
     onClose();
   };
 
@@ -40,7 +43,7 @@ const ServiceModal = ({
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-indigo-950 text-2xl"
+          className="absolute top-3 right-3 text-indigo-950 text-2xl cursor-pointer"
         >
           ×
         </button>
@@ -56,7 +59,7 @@ const ServiceModal = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Service Name"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
@@ -66,7 +69,7 @@ const ServiceModal = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Service Description"
-              className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none overflow-y-scroll"
+              className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none overflow-y-scroll focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             ></textarea>
           </div>
@@ -77,14 +80,14 @@ const ServiceModal = ({
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Price (e.g., Starting at $1000)"
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
               required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md"
+            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
           >
             Submit
           </button>

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 type ProjectCardProps = {
-  id: number;
+  id: number | undefined;
   coverImg: string;
   title: string;
 };

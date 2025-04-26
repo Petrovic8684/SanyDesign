@@ -1,39 +1,29 @@
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { api } from "../lib/api";
+
+interface Service {
+  name: string;
+  description: string;
+  price: string;
+}
 
 const Services = () => {
-  const dummyServices = [
-    {
-      name: "Branding",
-      description:
-        "Helping businesses build their identity, from logos to brand guidelines.",
-      price: "Starting at $1000",
-    },
-    {
-      name: "Web Design",
-      description:
-        "Crafting user-friendly and visually appealing websites tailored to your needs.",
-      price: "Starting at $1500",
-    },
-    {
-      name: "UI/UX Design",
-      description:
-        "Designing intuitive and engaging user interfaces and experiences for web and mobile.",
-      price: "Starting at $1200",
-    },
-    {
-      name: "Illustration",
-      description:
-        "Custom illustrations to bring your ideas to life, from editorial to digital artwork.",
-      price: "Starting at $800",
-    },
-    {
-      name: "Social Media Design",
-      description:
-        "Creating standout designs for your social media presence, including posts and ads.",
-      price: "Starting at $500",
-    },
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const result = await api.get(`/services`);
+      setServices(result.data);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to get services.");
+    }
+  };
 
   return (
     <div className="bg-rose-50 flex flex-col">
@@ -64,7 +54,7 @@ const Services = () => {
               </tr>
             </thead>
             <tbody>
-              {dummyServices.map((service, index) => (
+              {services.map((service, index) => (
                 <tr key={index} className="hover:bg-rose-50">
                   <td className="px-6 py-4">{service.name}</td>
                   <td className="px-6 py-4 hidden md:table-cell">

@@ -1,52 +1,34 @@
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
+import { api } from "../lib/api";
+
+interface Project {
+  id: number | undefined;
+  coverImg: string;
+  title: string;
+  images: string[];
+  description: string;
+  tools: string[];
+  liveUrl: string;
+}
 
 const Landing = () => {
-  const dummyProjects = [
-    {
-      id: 1,
-      coverImg: "/assets/landing/2.png",
-      title: "Project One",
-      images: [
-        "/assets/project/1.png",
-        "/assets/project/2.png",
-        "/assets/project/3.png",
-      ],
-      description:
-        "This project is a creative exploration of modern design principles, focusing on user engagement and visual storytelling. The aim was to create a seamless experience that blends aesthetics with functionality.",
-      tools: ["Figma", "Photoshop", "Illustrator"],
-      liveUrl: "https://example.com",
-    },
-    {
-      id: 2,
-      coverImg: "/assets/landing/3.png",
-      title: "Project Two",
-      images: [
-        "/assets/project/1.png",
-        "/assets/project/2.png",
-        "/assets/project/3.png",
-      ],
-      description:
-        "This project is a creative exploration of modern design principles, focusing on user engagement and visual storytelling. The aim was to create a seamless experience that blends aesthetics with functionality.",
-      tools: ["Figma", "Photoshop", "Illustrator"],
-      liveUrl: "https://example.com",
-    },
-    {
-      id: 3,
-      coverImg: "/assets/landing/4.png",
-      title: "Project Three",
-      images: [
-        "/assets/project/1.png",
-        "/assets/project/2.png",
-        "/assets/project/3.png",
-      ],
-      description:
-        "This project is a creative exploration of modern design principles, focusing on user engagement and visual storytelling. The aim was to create a seamless experience that blends aesthetics with functionality.",
-      tools: ["Figma", "Photoshop", "Illustrator"],
-      liveUrl: "https://example.com",
-    },
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const result = await api.get(`/projects`);
+      setProjects(result.data);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to get projects.");
+    }
+  };
 
   return (
     <div className="bg-rose-50 flex flex-col">
@@ -87,7 +69,7 @@ const Landing = () => {
         id="work"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-24 pb-6"
       >
-        {dummyProjects.map((project) => (
+        {projects.map((project) => (
           <ProjectCard
             key={project.id}
             id={project.id}
