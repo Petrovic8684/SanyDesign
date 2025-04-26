@@ -23,10 +23,10 @@ const ProjectModal = ({
   toolsList,
 }: ProjectModalProps) => {
   const [coverImg, setCoverImg] = useState<string>("");
-  const [coverFile, setCoverFile] = useState<File | null>(null);
+  //const [coverFile, setCoverFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");
   const [images, setImages] = useState<string[]>([]);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  //const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [description, setDescription] = useState<string>("");
   const [tools, setTools] = useState<string[]>([]);
   const [liveUrl, setLiveUrl] = useState<string>("");
@@ -60,7 +60,7 @@ const ProjectModal = ({
   const handleCoverFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setCoverFile(file);
+      //setCoverFile(file);
       setCoverImg(URL.createObjectURL(file));
     }
   };
@@ -69,7 +69,7 @@ const ProjectModal = ({
     const files = e.target.files;
     if (files) {
       const fileArray = Array.from(files);
-      setImageFiles(fileArray);
+      //setImageFiles(fileArray);
       const urls = fileArray.map((file) => URL.createObjectURL(file));
       setImages(urls);
     }
