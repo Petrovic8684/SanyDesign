@@ -1,0 +1,86 @@
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
+
+const Services = () => {
+  const dummyServices = [
+    {
+      name: "Branding",
+      description:
+        "Helping businesses build their identity, from logos to brand guidelines.",
+      price: "Starting at $1000",
+    },
+    {
+      name: "Web Design",
+      description:
+        "Crafting user-friendly and visually appealing websites tailored to your needs.",
+      price: "Starting at $1500",
+    },
+    {
+      name: "UI/UX Design",
+      description:
+        "Designing intuitive and engaging user interfaces and experiences for web and mobile.",
+      price: "Starting at $1200",
+    },
+    {
+      name: "Illustration",
+      description:
+        "Custom illustrations to bring your ideas to life, from editorial to digital artwork.",
+      price: "Starting at $800",
+    },
+    {
+      name: "Social Media Design",
+      description:
+        "Creating standout designs for your social media presence, including posts and ads.",
+      price: "Starting at $500",
+    },
+  ];
+
+  return (
+    <div className="bg-rose-50 flex flex-col">
+      <Navbar active="services" />
+
+      <main className="flex-1 flex flex-col items-center justify-center px-6 mt-14">
+        <div className="text-center mb-8 space-y-6">
+          <h1 className="text-3xl lg:text-4xl font-bold text-indigo-950">
+            My Services
+          </h1>
+
+          <p className="text-lg text-indigo-950 mb-4 lg:mb-2">
+            I offer a range of creative services that can help you build a solid
+            visual identity, <br className="hidden md:block" /> enhance user
+            experiences, and stand out in the digital world.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto px-4 mb-6">
+          <table className="min-w-full bg-white border rounded-lg shadow-lg">
+            <thead>
+              <tr className="bg-indigo-950 text-white">
+                <th className="px-6 py-3 text-left">Service</th>
+                <th className="px-6 py-3 text-left hidden md:table-cell">
+                  Description
+                </th>
+                <th className="px-6 py-3 text-left">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dummyServices.map((service, index) => (
+                <tr key={index} className="hover:bg-rose-50">
+                  <td className="px-6 py-4">{service.name}</td>
+                  <td className="px-6 py-4 hidden md:table-cell">
+                    {service.description}
+                  </td>
+                  <td className="px-6 py-4">{service.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Services;
