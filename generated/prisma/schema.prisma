@@ -16,7 +16,8 @@ model Project {
   images      String[]
   description String
   tools       String[]
-  liveUrl     String
+  liveUrl     String?
+  createdAt   DateTime @default(now())
 }
 
 model Tool {

@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { PrismaService } from '../prisma.service';
-import * as cloudinary from 'cloudinary'; // Ispravan import
+import * as cloudinary from 'cloudinary';
 
 @Injectable()
 export class ProjectService {
   constructor(private prisma: PrismaService) {
-    // Konfiguracija Cloudinary-ja
     cloudinary.v2.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
@@ -22,7 +21,11 @@ export class ProjectService {
   }
 
   async findAll() {
-    return this.prisma.project.findMany();
+    return this.prisma.project.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   async findOne(id: number) {

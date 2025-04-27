@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -23,7 +29,7 @@ export class CreateProjectDto {
   @IsNotEmpty()
   tools: string[];
 
+  @IsOptional()
   @IsUrl()
-  @IsNotEmpty()
-  liveUrl: string;
+  liveUrl?: string | null;
 }

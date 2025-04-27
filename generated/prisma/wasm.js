@@ -124,7 +124,8 @@ exports.Prisma.ProjectScalarFieldEnum = {
   images: 'images',
   description: 'description',
   tools: 'tools',
-  liveUrl: 'liveUrl'
+  liveUrl: 'liveUrl',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.ToolScalarFieldEnum = {
@@ -149,6 +150,11 @@ exports.Prisma.SortOrder = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 
