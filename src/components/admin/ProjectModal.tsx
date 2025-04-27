@@ -32,6 +32,7 @@ const ProjectModal = ({
   const [description, setDescription] = useState<string>("");
   const [tools, setTools] = useState<string[]>([]);
   const [liveUrl, setLiveUrl] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   const id = initialData?.id;
 
@@ -48,6 +49,7 @@ const ProjectModal = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
     let coverImgUrl = "";
     let imagesUrls: string[] = [];
@@ -55,17 +57,17 @@ const ProjectModal = ({
     if (coverImgFile) {
       coverImgUrl = await uploadToCloudinary(coverImgFile);
     } else {
-      coverImgUrl = coverImg; // Use the initial cover image if not updated
+      coverImgUrl = coverImg;
     }
 
     if (imageFiles.length > 0) {
       const uploadPromises = imageFiles.map((file) => uploadToCloudinary(file));
       imagesUrls = await Promise.all(uploadPromises);
     } else {
-      imagesUrls = images; // Use the initial images if not updated
+      imagesUrls = images;
     }
 
-    onSubmit({
+    await onSubmit({
       id,
       coverImg: coverImgUrl,
       title,
@@ -75,6 +77,7 @@ const ProjectModal = ({
       liveUrl,
     });
 
+    setLoading(false);
     onClose();
   };
 
@@ -243,9 +246,12 @@ const ProjectModal = ({
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
+            disabled={loading}
+            className={`w-full py-3 mt-2 text-white bg-indigo-950 rounded-md ${
+              loading ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Submit
+            {loading ? "Loading..." : "Submit"}
           </button>
         </form>
       </div>

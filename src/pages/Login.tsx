@@ -6,12 +6,16 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
+
     try {
+      setLoading(true);
+
       const response = await api.post("/auth/login", { username, password });
       const { token } = response.data;
 
@@ -20,8 +24,10 @@ const Login = () => {
       navigate("/admin");
     } catch (err: any) {
       if (err.response) {
-        setError(err.response.data.message || "An error occurred.");
+        setError(err.response.data.message || "An error occurred");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,14 +68,17 @@ const Login = () => {
           </div>
 
           {error && (
-            <div className="mb-4 text-red-600 font-medium">{error}</div>
+            <div className="mb-4 text-indigo-800 font-semibold">{error}</div>
           )}
 
           <button
             type="submit"
-            className="w-full py-3 mt-4 text-white bg-indigo-950 rounded-md cursor-pointer"
+            disabled={loading}
+            className={`w-full py-3 mt-4 text-white bg-indigo-950 rounded-md ${
+              loading ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Login
+            {loading ? "Loading..." : "Login"}
           </button>
         </form>
       </main>

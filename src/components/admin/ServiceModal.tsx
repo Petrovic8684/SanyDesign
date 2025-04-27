@@ -21,6 +21,7 @@ const ServiceModal = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const id = initialData?.id;
 
@@ -32,9 +33,11 @@ const ServiceModal = ({
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({ id, name, description, price });
+    setLoading(true);
+    await onSubmit({ id, name, description, price });
+    setLoading(false);
     onClose();
   };
 
@@ -87,9 +90,12 @@ const ServiceModal = ({
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
+            disabled={loading}
+            className={`w-full py-3 mt-2 text-white bg-indigo-950 rounded-md ${
+              loading ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Submit
+            {loading ? "Loading..." : "Submit"}
           </button>
         </form>
       </div>

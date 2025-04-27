@@ -17,6 +17,7 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("");
   const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const id = initialData?.id;
 
@@ -28,9 +29,11 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit({ id, name, emoji, url });
+    setLoading(true);
+    await onSubmit({ id, name, emoji, url });
+    setLoading(false);
     onClose();
   };
 
@@ -84,9 +87,12 @@ const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 text-white bg-indigo-950 rounded-md cursor-pointer"
+            disabled={loading}
+            className={`w-full py-3 mt-2 text-white bg-indigo-950 rounded-md ${
+              loading ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
-            Submit
+            {loading ? "Loading..." : "Submit"}
           </button>
         </form>
       </div>

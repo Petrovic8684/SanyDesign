@@ -4,6 +4,7 @@ import ToolModal from "../components/admin/ToolModal";
 import ServiceModal from "../components/admin/ServiceModal";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import { BeatLoader } from "react-spinners";
 
 interface Project {
   id: number | undefined;
@@ -30,9 +31,9 @@ interface Service {
 }
 
 const AdminPanel = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  const [projects, setProjects] = useState<Project[]>();
+  const [tools, setTools] = useState<Tool[]>();
+  const [services, setServices] = useState<Service[]>();
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showToolModal, setShowToolModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
@@ -85,6 +86,8 @@ const AdminPanel = () => {
   };
 
   const handleAddProject = async (data: Project) => {
+    if (!projects) return;
+
     if (data.liveUrl === "") data.liveUrl = null;
     try {
       const response = await api.post("/projects", data);
@@ -95,6 +98,7 @@ const AdminPanel = () => {
   };
 
   const handleEditProject = async (data: Project) => {
+    if (!projects) return;
     if (!currentProject || currentProject.id === undefined) return;
 
     if (data.liveUrl === "") data.liveUrl = null;
@@ -111,6 +115,7 @@ const AdminPanel = () => {
   };
 
   const handleDeleteProject = async (id: number | undefined) => {
+    if (!projects) return;
     if (id === undefined) return;
 
     const isConfirmed = window.confirm(
@@ -127,6 +132,8 @@ const AdminPanel = () => {
   };
 
   const handleAddTool = async (data: Tool) => {
+    if (!tools) return;
+
     try {
       const response = await api.post("/tools", data);
       setTools([...tools, response.data]);
@@ -136,6 +143,7 @@ const AdminPanel = () => {
   };
 
   const handleEditTool = async (data: Tool) => {
+    if (!tools) return;
     if (!currentTool) return;
 
     try {
@@ -150,6 +158,8 @@ const AdminPanel = () => {
   };
 
   const handleDeleteTool = async (id: number | undefined) => {
+    if (!tools) return;
+
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this tool?"
     );
@@ -164,6 +174,8 @@ const AdminPanel = () => {
   };
 
   const handleAddService = async (data: Service) => {
+    if (!services) return;
+
     try {
       const response = await api.post("/services", data);
       setServices([...services, response.data]);
@@ -173,6 +185,7 @@ const AdminPanel = () => {
   };
 
   const handleEditService = async (data: Service) => {
+    if (!services) return;
     if (!currentService) return;
 
     try {
@@ -187,6 +200,7 @@ const AdminPanel = () => {
   };
 
   const handleDeleteService = async (id: number | undefined) => {
+    if (!services) return;
     if (id === undefined) return;
 
     const isConfirmed = window.confirm(
@@ -224,89 +238,97 @@ const AdminPanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {projects.map((project, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{project.title}</td>
-                    <td className="p-3">
-                      <img
-                        src={project.coverImg}
-                        alt={project.title}
-                        className="w-20 h-20 object-cover rounded-md"
-                      />
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-wrap gap-2">
-                        {project.images.map((img, idx) => (
-                          <img
+                {projects ? (
+                  projects.map((project, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="p-3">{project.title}</td>
+                      <td className="p-3">
+                        <img
+                          src={project.coverImg}
+                          alt={project.title}
+                          className="w-20 h-20 object-cover rounded-md"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-2">
+                          {project.images.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={img}
+                              alt={`Img ${idx + 1}`}
+                              className="w-12 h-12 object-cover rounded-md"
+                            />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        {project.description && project.description.length > 20
+                          ? `${project.description.slice(0, 20)}...`
+                          : project.description}
+                      </td>
+                      <td className="p-3">
+                        {project.tools.map((tool, idx) => (
+                          <span
                             key={idx}
-                            src={img}
-                            alt={`Img ${idx + 1}`}
-                            className="w-12 h-12 object-cover rounded-md"
-                          />
+                            className="inline-block bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs mr-2"
+                          >
+                            {tool}
+                          </span>
                         ))}
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      {project.description && project.description.length > 20
-                        ? `${project.description.slice(0, 20)}...`
-                        : project.description}
-                    </td>
-                    <td className="p-3">
-                      {project.tools.map((tool, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-block bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs mr-2"
+                      </td>
+                      <td className="p-3">
+                        {project.liveUrl ? (
+                          <a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 underline"
+                          >
+                            {project.liveUrl}
+                          </a>
+                        ) : (
+                          <p className="text-indigo-800 italic font-bold">
+                            NULL
+                          </p>
+                        )}
+                      </td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => {
+                            setCurrentProject(project);
+                            setShowProjectModal(true);
+                          }}
+                          className="text-indigo-600 cursor-pointer"
                         >
-                          {tool}
-                        </span>
-                      ))}
-                    </td>
-                    <td className="p-3">
-                      {project.liveUrl ? (
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 underline"
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="text-red-600 cursor-pointer"
                         >
-                          {project.liveUrl}
-                        </a>
-                      ) : (
-                        <p className="text-indigo-800 italic font-bold">NULL</p>
-                      )}
-                    </td>
-                    <td className="p-3 space-x-2">
-                      <button
-                        onClick={() => {
-                          setCurrentProject(project);
-                          setShowProjectModal(true);
-                        }}
-                        className="text-indigo-600 cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="text-red-600 cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <BeatLoader color="#1E1A4D" margin={10} />
+                )}
               </tbody>
             </table>
           </div>
 
-          <button
-            onClick={() => {
-              setCurrentProject(null);
-              setShowProjectModal(true);
-            }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-          >
-            Add Project
-          </button>
+          {projects && (
+            <button
+              onClick={() => {
+                setCurrentProject(null);
+                setShowProjectModal(true);
+              }}
+              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
+            >
+              Add Project
+            </button>
+          )}
         </div>
 
         <div className="mb-8">
@@ -323,52 +345,58 @@ const AdminPanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {tools.map((tool, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{tool.name}</td>
-                    <td className="p-3 text-2xl">{tool.emoji}</td>
-                    <td className="p-3">
-                      <a
-                        href={tool.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 underline"
-                      >
-                        {tool.url}
-                      </a>
-                    </td>
-                    <td className="p-3 space-x-2">
-                      <button
-                        onClick={() => {
-                          setCurrentTool(tool);
-                          setShowToolModal(true);
-                        }}
-                        className="text-indigo-600 cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTool(tool.id)}
-                        className="text-red-600 cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {tools ? (
+                  tools.map((tool, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="p-3">{tool.name}</td>
+                      <td className="p-3 text-2xl">{tool.emoji}</td>
+                      <td className="p-3">
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 underline"
+                        >
+                          {tool.url}
+                        </a>
+                      </td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => {
+                            setCurrentTool(tool);
+                            setShowToolModal(true);
+                          }}
+                          className="text-indigo-600 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTool(tool.id)}
+                          className="text-red-600 cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <BeatLoader color="#1E1A4D" margin={10} />
+                )}
               </tbody>
             </table>
           </div>
 
-          <button
-            onClick={() => {
-              setCurrentTool(null);
-              setShowToolModal(true);
-            }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-          >
-            Add Tool
-          </button>
+          {tools && (
+            <button
+              onClick={() => {
+                setCurrentTool(null);
+                setShowToolModal(true);
+              }}
+              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
+            >
+              Add Tool
+            </button>
+          )}
         </div>
 
         <div className="mb-4">
@@ -387,47 +415,53 @@ const AdminPanel = () => {
                 </tr>
               </thead>
               <tbody>
-                {services.map((service, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-3">{service.name}</td>
-                    <td className="p-3">
-                      {service.description && service.description.length > 40
-                        ? `${service.description.slice(0, 40)}...`
-                        : service.description}
-                    </td>{" "}
-                    <td className="p-3">{service.price}</td>
-                    <td className="p-3 space-x-2">
-                      <button
-                        onClick={() => {
-                          setCurrentService(service);
-                          setShowServiceModal(true);
-                        }}
-                        className="text-indigo-600 cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteService(service.id)}
-                        className="text-red-600 cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {services ? (
+                  services.map((service, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="p-3">{service.name}</td>
+                      <td className="p-3">
+                        {service.description && service.description.length > 40
+                          ? `${service.description.slice(0, 40)}...`
+                          : service.description}
+                      </td>{" "}
+                      <td className="p-3">{service.price}</td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => {
+                            setCurrentService(service);
+                            setShowServiceModal(true);
+                          }}
+                          className="text-indigo-600 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteService(service.id)}
+                          className="text-red-600 cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <BeatLoader color="#1E1A4D" margin={10} />
+                )}
               </tbody>
             </table>
           </div>
 
-          <button
-            onClick={() => {
-              setCurrentService(null);
-              setShowServiceModal(true);
-            }}
-            className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-          >
-            Add Service
-          </button>
+          {services && (
+            <button
+              onClick={() => {
+                setCurrentService(null);
+                setShowServiceModal(true);
+              }}
+              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
+            >
+              Add Service
+            </button>
+          )}
         </div>
 
         <button
@@ -437,7 +471,7 @@ const AdminPanel = () => {
           LOGOUT
         </button>
 
-        {showProjectModal && (
+        {showProjectModal && tools && (
           <ProjectModal
             onClose={() => {
               setShowProjectModal(false);
