@@ -3,6 +3,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import { api } from "../lib/api";
+import { GridLoader } from "react-spinners";
 
 interface Project {
   id: number | undefined;
@@ -11,11 +12,11 @@ interface Project {
   images: string[];
   description: string;
   tools: string[];
-  liveUrl: string;
+  liveUrl: string | null;
 }
 
 const Landing = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>();
 
   useEffect(() => {
     fetchProjects();
@@ -65,19 +66,28 @@ const Landing = () => {
         </a>
       </main>
 
-      <section
-        id="work"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-24 pb-6"
-      >
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            id={project.id}
-            coverImg={project.coverImg}
-            title={project.title}
-          />
-        ))}
-      </section>
+      {projects ? (
+        <section
+          id="work"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pt-24 pb-6"
+        >
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              coverImg={project.coverImg}
+              title={project.title}
+            />
+          ))}
+        </section>
+      ) : (
+        <GridLoader
+          size={35}
+          color="#1E1A4D"
+          margin={20}
+          className="mx-auto my-15"
+        />
+      )}
 
       <Footer />
     </div>

@@ -15,7 +15,7 @@ interface ProjectFormData {
   images: string[];
   description: string;
   tools: string[];
-  liveUrl: string;
+  liveUrl: string | null;
 }
 
 const ProjectModal = ({
@@ -42,7 +42,7 @@ const ProjectModal = ({
       setImages(initialData.images);
       setDescription(initialData.description);
       setTools(initialData.tools);
-      setLiveUrl(initialData.liveUrl);
+      setLiveUrl(initialData.liveUrl ?? "");
     }
   }, [initialData]);
 
@@ -238,7 +238,6 @@ const ProjectModal = ({
               onChange={(e) => setLiveUrl(e.target.value)}
               placeholder="Live Project URL"
               className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-800"
-              required
             />
           </div>
 

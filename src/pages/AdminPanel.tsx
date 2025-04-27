@@ -12,7 +12,7 @@ interface Project {
   images: string[];
   description: string;
   tools: string[];
-  liveUrl: string;
+  liveUrl: string | null;
 }
 
 interface Tool {
@@ -81,10 +81,11 @@ const AdminPanel = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   const handleAddProject = async (data: Project) => {
+    if (data.liveUrl === "") data.liveUrl = null;
     try {
       const response = await api.post("/projects", data);
       setProjects([...projects, response.data]);
@@ -95,6 +96,8 @@ const AdminPanel = () => {
 
   const handleEditProject = async (data: Project) => {
     if (!currentProject || currentProject.id === undefined) return;
+
+    if (data.liveUrl === "") data.liveUrl = null;
 
     try {
       const response = await api.patch(`/projects/${currentProject.id}`, data);
@@ -109,6 +112,11 @@ const AdminPanel = () => {
 
   const handleDeleteProject = async (id: number | undefined) => {
     if (id === undefined) return;
+
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this project?"
+    );
+    if (!isConfirmed) return;
 
     try {
       await api.delete(`/projects/${id}`);
@@ -142,6 +150,11 @@ const AdminPanel = () => {
   };
 
   const handleDeleteTool = async (id: number | undefined) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this tool?"
+    );
+    if (!isConfirmed) return;
+
     try {
       await api.delete(`/tools/${id}`);
       setTools(tools.filter((tool) => tool.id !== id));
@@ -175,6 +188,11 @@ const AdminPanel = () => {
 
   const handleDeleteService = async (id: number | undefined) => {
     if (id === undefined) return;
+
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this service?"
+    );
+    if (!isConfirmed) return;
 
     try {
       await api.delete(`/services/${id}`);
@@ -228,7 +246,11 @@ const AdminPanel = () => {
                         ))}
                       </div>
                     </td>
-                    <td className="p-3">{project.description}</td>
+                    <td className="p-3">
+                      {project.description && project.description.length > 20
+                        ? `${project.description.slice(0, 20)}...`
+                        : project.description}
+                    </td>
                     <td className="p-3">
                       {project.tools.map((tool, idx) => (
                         <span
@@ -240,14 +262,18 @@ const AdminPanel = () => {
                       ))}
                     </td>
                     <td className="p-3">
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 underline"
-                      >
-                        {project.liveUrl}
-                      </a>
+                      {project.liveUrl ? (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 underline"
+                        >
+                          {project.liveUrl}
+                        </a>
+                      ) : (
+                        <p className="text-indigo-800 italic font-bold">NULL</p>
+                      )}
                     </td>
                     <td className="p-3 space-x-2">
                       <button
@@ -364,7 +390,11 @@ const AdminPanel = () => {
                 {services.map((service, index) => (
                   <tr key={index} className="border-b">
                     <td className="p-3">{service.name}</td>
-                    <td className="p-3">{service.description}</td>
+                    <td className="p-3">
+                      {service.description && service.description.length > 40
+                        ? `${service.description.slice(0, 40)}...`
+                        : service.description}
+                    </td>{" "}
                     <td className="p-3">{service.price}</td>
                     <td className="p-3 space-x-2">
                       <button

@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { api } from "../lib/api";
+import { GridLoader } from "react-spinners";
 
 interface Project {
   id: number | undefined;
@@ -19,17 +20,31 @@ const Project = () => {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImage, setModalImage] = useState<string>("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchProject();
   }, [id]);
 
+  useEffect(() => {
+    if (isModalOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isModalOpen]);
+
   const fetchProject = async () => {
+    setError(null);
+
     try {
       const result = await api.get(`/projects/${id}`);
       setProject(result.data);
     } catch (err: any) {
-      console.error(err.response?.data?.message || "Failed to get project.");
+      setError(err.response?.data?.message || "Failed to get project");
     }
   };
 
@@ -47,82 +62,134 @@ const Project = () => {
     );
   };
 
-  if (!project) {
-    return (
-      <div className="bg-rose-50 flex flex-col min-h-screen">
-        <Navbar active="" />
-      </div>
-    );
-  }
+  const handleDescription = (description: string) => {
+    const formattedDescription = description.replace(/\\n/g, "\n");
+
+    return formattedDescription.split("\n").map((line, index) => (
+      <span key={index}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+
+  const openModal = (imageUrl: string) => {
+    setModalImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalImage("");
+  };
 
   return (
     <div className="bg-rose-50 flex flex-col min-h-screen">
       <Navbar active="" />
 
-      <main className="flex-1 flex flex-col items-center px-6 mt-14">
-        <div className="max-w-4xl w-full flex flex-col items-center text-center">
-          <h1 className="text-4xl font-bold text-indigo-950 mb-8 md:mb-12">
-            {project.title}
-          </h1>
+      {project ? (
+        <main className="flex-1 flex flex-col items-center px-6 mt-14">
+          <div className="max-w-4xl w-full flex flex-col items-center text-center">
+            <h1 className="text-4xl font-bold text-indigo-950 mb-8 md:mb-12">
+              {project.title}
+            </h1>
 
-          <div className="relative w-full overflow-hidden mb-10">
-            <img
-              src={project.images[currentImage]}
-              alt={project.title}
-              className="object-cover w-70 h-full transition-all duration-300 mx-auto rounded-2xl shadow-lg"
-            />
+            <div className="relative w-full overflow-hidden mb-10">
+              <img
+                src={project.images[currentImage]}
+                alt={project.title}
+                className="object-cover w-70 h-full transition-all duration-300 mx-auto rounded-2xl shadow-lg cursor-pointer"
+                onClick={() => openModal(project.images[currentImage])}
+              />
 
-            <button
-              onClick={prevImage}
-              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
-            >
-              <HiChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
-            </button>
-
-            <button
-              onClick={nextImage}
-              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
-            >
-              <HiChevronRight className="w-6 h-6 md:w-8 md:h-8" />
-            </button>
-          </div>
-
-          <p className="text-lg text-indigo-950 mb-10">{project.description}</p>
-
-          {project.tools.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-4 mb-4">
-              {project.tools.map((tool, index) => (
-                <span
-                  key={index}
-                  className="px-4 py-2 bg-indigo-950 text-rose-50 rounded-full text-sm font-semibold shadow-sm"
+              {project.images.length > 1 && (
+                <button
+                  onClick={prevImage}
+                  className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
                 >
-                  {tool}
-                </span>
-              ))}
-            </div>
-          )}
+                  <HiChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+                </button>
+              )}
 
-          {project.liveUrl && (
-            <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="my-8 text-indigo-950 text-sm flex items-center space-x-1 hover:underline"
-            >
-              <span className="text-base md:text-lg">More details</span>
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414L10 13.414 5.293 8.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </a>
-          )}
+              {project.images.length > 1 && (
+                <button
+                  onClick={nextImage}
+                  className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-indigo-950/80 hover:bg-indigo-950 text-white p-3 rounded-full shadow-lg cursor-pointer"
+                >
+                  <HiChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+                </button>
+              )}
+            </div>
+
+            <p className="text-lg text-indigo-950 mb-10">
+              {handleDescription(project.description)}
+            </p>
+
+            {project.tools.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 mb-4">
+                {project.tools.map((tool, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-indigo-950 text-rose-50 rounded-full text-sm font-semibold shadow-sm"
+                  >
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {project.liveUrl && (
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="my-8 text-indigo-950 text-sm flex items-center space-x-1 hover:underline"
+              >
+                <span className="text-base md:text-lg">More details</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414L10 13.414 5.293 8.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </a>
+            )}
+          </div>
+        </main>
+      ) : (
+        <div className="m-auto">
+          <GridLoader size={35} color="#1E1A4D" margin={20} />
+
+          <div className="text-indigo-900 text-lg font-semibold mx-auto mt-8">
+            {error}
+          </div>
         </div>
-      </main>
+      )}
 
       <Footer />
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center z-50 overflow-y-auto px-6 backdrop-blur-xl backdrop-brightness-40">
+          <div className="relative rounded-lg">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 h-8 w-8 bg-white text-black text-3xl font-bold cursor-pointer shadow-md/30 flex items-end justify-center"
+            >
+              ×
+            </button>
+            <img
+              src={modalImage}
+              alt="Magnified image"
+              className="max-w-full max-h-[80vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
@@ -76,10 +75,15 @@ const About = () => {
                   key={tool.id}
                   className="hover:text-indigo-700 cursor-pointer"
                 >
-                  <Link to={tool.url} className="flex items-center gap-2">
+                  <a
+                    href={tool.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
                     <span>{tool.emoji}</span>
                     <span>{tool.name}</span>
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
