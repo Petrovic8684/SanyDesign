@@ -45,7 +45,11 @@ const About = () => {
 
         <div className="relative flex justify-center items-center mb-14">
           <img
-            src="/assets/about/sany.jpg"
+            src={`https://res.cloudinary.com/${
+              import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+            }/image/upload/f_auto,q_auto/v1/${
+              import.meta.env.VITE_CLOUDINARY_FOLDER
+            }/trw4psd4hr6wfpdr5fzv`}
             alt=""
             className="lg:w-1/2 md:w-2/3 w-full rounded-2xl shadow-lg"
           />

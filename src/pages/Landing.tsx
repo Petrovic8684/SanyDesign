@@ -44,7 +44,11 @@ const Landing = () => {
 
           <div className="relative flex justify-center items-center">
             <img
-              src="/assets/landing/sany.jpg"
+              src={`https://res.cloudinary.com/${
+                import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+              }/image/upload/f_auto,q_auto/v1/${
+                import.meta.env.VITE_CLOUDINARY_FOLDER
+              }/fwsi83qfjhbb5u0s9ref`}
               alt=""
               className="w-40 lg:w-48 rounded-2xl shadow-lg"
             />
