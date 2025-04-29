@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
         <div className="flex space-x-6 mb-4 md:mb-0">
           <a
-            href="https://www.instagram.com"
+            href="https://www.instagram.com/sany_design_/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-indigo-300 transition-colors duration-200"
@@ -14,7 +14,7 @@ const Footer = () => {
             <FaInstagram className="w-6 h-6" />
           </a>
           <a
-            href="https://www.linkedin.com"
+            href="https://www.linkedin.com/in/sanela-petkovi%C4%87-b14135363"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-indigo-300 transition-colors duration-200"
