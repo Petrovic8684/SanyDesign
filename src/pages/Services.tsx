@@ -233,7 +233,7 @@ const Services = () => {
 
             <div className="flex flex-col items-center space-y-4">
               <ReCAPTCHA
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE}
                 ref={captchaRef}
               />
 
