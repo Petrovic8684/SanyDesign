@@ -14,7 +14,11 @@ const Navbar = ({ active }: NavbarProps) => {
   };
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/70 backdrop-blur shadow-sm">
+    <header
+      className={`w-full sticky top-0 z-50 bg-white/80 backdrop-blur ${
+        isMenuOpen ? "shadow-none" : "shadow-md"
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
         <Link
           to={"/"}
@@ -79,7 +83,7 @@ const Navbar = ({ active }: NavbarProps) => {
       </div>
 
       {isMenuOpen && (
-        <nav className="md:hidden absolute top-16 left-0 w-full z-50 bg-white/70 backdrop-blur shadow-sm pt-4 pb-8">
+        <nav className="md:hidden absolute top-16 left-0 w-full z-50 bg-white/80 backdrop-blur shadow-xl pt-4 pb-8">
           <div className="flex flex-col items-center space-y-4">
             <Link
               to="/"

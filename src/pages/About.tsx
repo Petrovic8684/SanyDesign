@@ -37,7 +37,7 @@ const About = () => {
           </p>
         </div>
 
-        <div className="relative flex justify-center items-center mb-14">
+        <div className="relative flex justify-center items-center mb-4">
           <img
             src={`https://res.cloudinary.com/${
               import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
@@ -48,45 +48,75 @@ const About = () => {
             className="lg:w-1/2 md:w-2/3 w-full rounded-2xl shadow-lg"
           />
         </div>
+        <a
+          onClick={(e) => {
+            e.preventDefault();
+            document
+              .getElementById("tools")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="mt-8 mb-4 text-indigo-950 text-sm flex items-center space-x-1 hover:underline cursor-pointer"
+        >
+          <span className="text-base md:text-lg">What Powers My Work</span>
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414L10 13.414 5.293 8.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </a>
 
-        <div className="w-full px-6">
-          <section className="w-full lg:w-3/5 py-12 px-6 md:px-12 bg-white text-center lg:text-left rounded-2xl shadow-md mb-10 lg:mr-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-indigo-950">
+        <section className="min-w-screen bg-indigo-950 text-white py-12 px-6 mb-12 mt-20">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl lg:text-4xl font-semibold italic">
               My Creative Process
             </h2>
-            <p className="mt-6 text-base md:text-lg text-indigo-950 max-w-3xl mx-auto">
+            <p className="text-lg text-indigo-100">
               From brainstorming sessions to final designs, I take a hands-on,
               collaborative approach to every project. I believe that good
               design starts with a deep understanding of the client's needs,
               followed by creative exploration, and finishing with seamless
               execution.
             </p>
-          </section>
+          </div>
+        </section>
 
-          <section className="w-full lg:w-3/5 py-12 px-6 md:px-12 bg-white text-center lg:text-right rounded-2xl shadow-md mb-10 lg:ml-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-indigo-950">
+        <section
+          className="min-w-screen bg-rose-50 text-white py-12 px-6 mb-12"
+          id="tools"
+        >
+          <div className="max-w-3xl mx-auto text-center space-y-6 text-indigo-950">
+            <h2 className="text-3xl lg:text-4xl font-bold">
               Tools I Work With
             </h2>
-            <ul className="flex flex-wrap justify-center gap-8 mt-8 text-base md:text-lg text-indigo-950">
-              {tools.map((tool) => (
-                <li
-                  key={tool.id}
-                  className="hover:text-indigo-700 cursor-pointer"
+            <p className="text-lg">
+              These are some of the powerful tools that I use to bring your
+              ideas to life.
+            </p>
+          </div>
+
+          <div className="flex justify-center gap-8 mt-10 flex-wrap">
+            {tools.map((tool) => (
+              <div
+                key={tool.id}
+                className="bg-white rounded-2xl shadow-lg p-6 w-40 flex flex-col items-center text-indigo-950 hover:bg-indigo-100 transition-all duration-300 ease-in-out transform hover:scale-105"
+              >
+                <a
+                  href={tool.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center"
                 >
-                  <a
-                    href={tool.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <span>{tool.emoji}</span>
-                    <span>{tool.name}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+                  <span className="text-4xl">{tool.emoji}</span>
+                  <span className="mt-4 text-lg font-medium text-center">
+                    {tool.name}
+                  </span>
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <Footer />

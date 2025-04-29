@@ -5,11 +5,12 @@ import ServiceModal from "../components/admin/ServiceModal";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { BeatLoader } from "react-spinners";
-import { Project, Tool, Service } from "../lib/types";
+import { Project, Tool, Service, Message, Faq } from "../lib/types";
 import {
   DndContext,
   closestCenter,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -21,26 +22,34 @@ import {
 import SortableProjectRow from "../components/admin/SortableProjectRow";
 import SortableToolRow from "../components/admin/SortableToolRow";
 import SortableServiceRow from "../components/admin/SortableServiceRow";
+import Button from "../components/Button";
+import { TiDelete } from "react-icons/ti";
+import FaqModal from "../components/admin/FaqModal";
+import SortableFaqRow from "../components/admin/SortableFaqRow";
 
 const AdminPanel = () => {
   const [projects, setProjects] = useState<Project[]>();
   const [tools, setTools] = useState<Tool[]>();
   const [services, setServices] = useState<Service[]>();
+  const [faqs, setFaqs] = useState<Faq[]>();
+  const [messages, setMessages] = useState<Message[]>();
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showToolModal, setShowToolModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
+  const [showFaqModal, setShowFaqModal] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [currentService, setCurrentService] = useState<Service | null>(null);
+  const [currentFaq, setCurrentFaq] = useState<Faq | null>(null);
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   useEffect(() => {
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (showProjectModal || showToolModal || showServiceModal) {
+    if (showProjectModal || showToolModal || showServiceModal || showFaqModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
@@ -49,28 +58,36 @@ const AdminPanel = () => {
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [showProjectModal, showToolModal, showServiceModal]);
+  }, [showProjectModal, showToolModal, showServiceModal, showFaqModal]);
 
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
-      const [projectsResponse, toolsResponse, servicesResponse] =
-        await Promise.all([
-          api.get("/projects"),
-          api.get("/tools"),
-          api.get("/services"),
-        ]);
+      const [
+        projectsResponse,
+        toolsResponse,
+        servicesResponse,
+        faqsResponse,
+        messagesResponse,
+      ] = await Promise.all([
+        api.get("/projects"),
+        api.get("/tools"),
+        api.get("/services"),
+        api.get("/faqs"),
+        api.get("/messages"),
+      ]);
 
       setProjects(projectsResponse.data);
       setTools(toolsResponse.data);
       setServices(servicesResponse.data);
+      setFaqs(faqsResponse.data);
+      setMessages(messagesResponse.data);
     } catch (err: any) {
-      if (err.response) {
+      if (err.response)
         console.error(
           err.response.data.message || "An error occurred while fetching data."
         );
-      }
     }
   };
 
@@ -210,6 +227,64 @@ const AdminPanel = () => {
     }
   };
 
+  const handleDeleteMessage = async (id: number | undefined) => {
+    if (!messages || id === undefined) return;
+
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this message?"
+    );
+    if (!isConfirmed) return;
+
+    try {
+      await api.delete(`/messages/${id}`);
+      setMessages(messages.filter((msg) => msg.id !== id));
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to delete message.");
+    }
+  };
+
+  const handleAddFaq = async (data: Faq) => {
+    if (!faqs) return;
+
+    try {
+      const response = await api.post("/faqs", data);
+      setFaqs([response.data, ...faqs]);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to add FAQ.");
+    }
+  };
+
+  const handleEditFaq = async (data: Faq) => {
+    if (!faqs) return;
+    if (!currentFaq) return;
+
+    try {
+      const response = await api.patch(`/faqs/${currentFaq.id}`, data);
+      const updatedFaqs = faqs.map((faq) =>
+        faq.id === currentFaq.id ? response.data : faq
+      );
+      setFaqs(updatedFaqs);
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to edit FAQ.");
+    }
+  };
+
+  const handleDeleteFaq = async (id: number | undefined) => {
+    if (!faqs) return;
+
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this FAQ?"
+    );
+    if (!isConfirmed) return;
+
+    try {
+      await api.delete(`/faqs/${id}`);
+      setFaqs(faqs.filter((faq) => faq.id !== id));
+    } catch (err: any) {
+      console.error(err.response?.data?.message || "Failed to delete FAQ.");
+    }
+  };
+
   return (
     <div className="p-6 bg-rose-50 min-h-screen">
       <div className="my-12">
@@ -219,7 +294,7 @@ const AdminPanel = () => {
           </h2>
 
           {projects ? (
-            <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <div className="overflow-x-auto bg-white rounded-lg shadow mb-4">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -281,15 +356,13 @@ const AdminPanel = () => {
           )}
 
           {projects && (
-            <button
-              onClick={() => {
+            <Button
+              action={() => {
                 setCurrentProject(null);
                 setShowProjectModal(true);
               }}
-              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-            >
-              Add Project
-            </button>
+              text={"Add Project"}
+            />
           )}
         </div>
 
@@ -297,7 +370,7 @@ const AdminPanel = () => {
           <h2 className="text-2xl font-semibold text-indigo-950 mb-4">Tools</h2>
 
           {tools ? (
-            <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <div className="overflow-x-auto bg-white rounded-lg shadow mb-4">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -354,15 +427,13 @@ const AdminPanel = () => {
           )}
 
           {tools && (
-            <button
-              onClick={() => {
+            <Button
+              action={() => {
                 setCurrentTool(null);
                 setShowToolModal(true);
               }}
-              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-            >
-              Add Tool
-            </button>
+              text="Add Tool"
+            />
           )}
         </div>
 
@@ -372,7 +443,7 @@ const AdminPanel = () => {
           </h2>
 
           {services ? (
-            <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <div className="overflow-x-auto bg-white rounded-lg shadow mb-4">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -431,15 +502,126 @@ const AdminPanel = () => {
           )}
 
           {services && (
-            <button
-              onClick={() => {
+            <Button
+              action={() => {
                 setCurrentService(null);
                 setShowServiceModal(true);
               }}
-              className="bg-indigo-950 text-white py-2 px-4 rounded-md mt-6 cursor-pointer"
-            >
-              Add Service
-            </button>
+              text="Add Service"
+            />
+          )}
+        </div>
+
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold text-indigo-950 mb-4">FAQs</h2>
+
+          {faqs ? (
+            <div className="overflow-x-auto bg-white rounded-lg shadow mb-4">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={({ active, over }) => {
+                  if (!active || !over || active.id === over.id || !faqs)
+                    return;
+
+                  const oldIndex = faqs.findIndex((s) => s.id === active.id);
+                  const newIndex = faqs.findIndex((s) => s.id === over.id);
+                  const newOrder = arrayMove(faqs, oldIndex, newIndex);
+
+                  setFaqs(newOrder);
+
+                  newOrder.forEach((faq, index) => {
+                    api.patch(`/faqs/${faq.id}`, {
+                      orderNo: newOrder.length - index,
+                    });
+                  });
+                }}
+              >
+                <SortableContext
+                  items={faqs.map((s) => s.id!)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <table className="w-max md:min-w-full table-auto">
+                    <thead className="bg-indigo-950 text-white">
+                      <tr>
+                        <th className="p-3 text-left"> </th>
+                        <th className="p-3 text-left">Question</th>
+                        <th className="p-3 text-left">Answer</th>
+                        <th className="p-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {faqs.map((faq) => (
+                        <SortableFaqRow
+                          key={faq.id}
+                          faq={faq}
+                          onEdit={() => {
+                            setCurrentFaq(faq);
+                            setShowFaqModal(true);
+                          }}
+                          onDelete={() => handleDeleteFaq(faq.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            </div>
+          ) : (
+            <BeatLoader color="#1E1A4D" margin={10} />
+          )}
+
+          {faqs && (
+            <Button
+              action={() => {
+                setCurrentFaq(null);
+                setShowFaqModal(true);
+              }}
+              text="Add Faq"
+            />
+          )}
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold text-indigo-950 mb-4">
+            Messages
+          </h2>
+          {messages ? (
+            <div className="overflow-x-auto bg-white rounded-lg shadow mb-4">
+              <table className="w-max md:min-w-full table-auto">
+                <thead className="bg-indigo-950 text-white">
+                  <tr>
+                    <th className="p-3 text-left">Name</th>
+                    <th className="p-3 text-left">Email</th>
+                    <th className="p-3 text-left">Message</th>
+                    <th className="p-3 text-left">Date</th>
+                    <th className="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {messages.map((msg) => (
+                    <tr key={msg.id} className="border-t">
+                      <td className="p-3">{msg.name}</td>
+                      <td className="p-3">{msg.email}</td>
+                      <td className="p-3">{msg.message}</td>
+                      <td className="p-3">
+                        {new Date(msg.createdAt).toLocaleString()}
+                      </td>
+                      <td className="p-3">
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="text-red-600 cursor-pointer"
+                        >
+                          <TiDelete size={25} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <BeatLoader color="#1E1A4D" margin={10} />
           )}
         </div>
 
@@ -481,6 +663,17 @@ const AdminPanel = () => {
             }}
             onSubmit={currentService ? handleEditService : handleAddService}
             initialData={currentService || undefined}
+          />
+        )}
+
+        {showFaqModal && (
+          <FaqModal
+            onClose={() => {
+              setShowFaqModal(false);
+              setCurrentFaq(null);
+            }}
+            onSubmit={currentFaq ? handleEditFaq : handleAddFaq}
+            initialData={currentFaq || undefined}
           />
         )}
       </div>

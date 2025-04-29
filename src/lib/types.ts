@@ -22,4 +22,18 @@ interface Service {
   price: string;
 }
 
-export type { Project, Tool, Service };
+interface Faq {
+  id: number | undefined;
+  question: string;
+  answer: string;
+}
+
+interface Message {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
+}
+
+export type { Project, Tool, Service, Faq, Message };

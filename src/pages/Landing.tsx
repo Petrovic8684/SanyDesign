@@ -40,15 +40,20 @@ const Landing = () => {
               }/image/upload/f_auto,q_auto/v1/${
                 import.meta.env.VITE_CLOUDINARY_FOLDER
               }/fwsi83qfjhbb5u0s9ref`}
-              alt=""
+              alt="Sanela Petković"
               className="w-40 lg:w-48 rounded-2xl shadow-lg"
             />
           </div>
         </div>
 
         <a
-          href="#work"
-          className="my-8 text-indigo-950 text-sm flex items-center space-x-1 hover:underline"
+          onClick={(e) => {
+            e.preventDefault();
+            document
+              .getElementById("work")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="my-8 text-indigo-950 text-sm flex items-center space-x-1 hover:underline cursor-pointer"
         >
           <span className="text-base md:text-lg">Check out my work</span>
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
