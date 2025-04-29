@@ -144,6 +144,21 @@ exports.Prisma.ServiceScalarFieldEnum = {
   orderNo: 'orderNo'
 };
 
+exports.Prisma.MessageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.FaqScalarFieldEnum = {
+  id: 'id',
+  question: 'question',
+  answer: 'answer',
+  orderNo: 'orderNo'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -163,7 +178,9 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   Project: 'Project',
   Tool: 'Tool',
-  Service: 'Service'
+  Service: 'Service',
+  Message: 'Message',
+  Faq: 'Faq'
 };
 
 /**
