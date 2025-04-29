@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -32,4 +33,8 @@ export class CreateProjectDto {
   @IsOptional()
   @IsUrl()
   liveUrl?: string | null;
+
+  @IsOptional()
+  @IsNumber()
+  orderNo?: number | null;
 }

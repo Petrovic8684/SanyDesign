@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class CreateToolDto {
   @IsString()
@@ -12,4 +18,8 @@ export class CreateToolDto {
   @IsUrl()
   @IsNotEmpty()
   url: string;
+
+  @IsOptional()
+  @IsNumber()
+  orderNo?: number | null;
 }

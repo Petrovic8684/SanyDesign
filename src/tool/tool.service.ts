@@ -14,7 +14,11 @@ export class ToolService {
   }
 
   async findAll() {
-    return this.prisma.tool.findMany();
+    return this.prisma.tool.findMany({
+      orderBy: {
+        orderNo: 'desc',
+      },
+    });
   }
 
   async update(id: number, updateToolDto: UpdateToolDto) {

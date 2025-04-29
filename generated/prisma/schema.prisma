@@ -17,14 +17,15 @@ model Project {
   description String
   tools       String[]
   liveUrl     String?
-  createdAt   DateTime @default(now())
+  orderNo     Int?     @default(autoincrement())
 }
 
 model Tool {
-  id    Int    @id @default(autoincrement())
-  name  String
-  emoji String
-  url   String
+  id      Int    @id @default(autoincrement())
+  name    String
+  emoji   String
+  url     String
+  orderNo Int?   @default(autoincrement())
 }
 
 model Service {
@@ -32,4 +33,5 @@ model Service {
   name        String
   description String
   price       String
+  orderNo     Int?   @default(autoincrement())
 }

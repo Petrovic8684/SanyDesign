@@ -23,7 +23,7 @@ export class ProjectService {
   async findAll() {
     return this.prisma.project.findMany({
       orderBy: {
-        createdAt: 'desc',
+        orderNo: 'desc',
       },
     });
   }

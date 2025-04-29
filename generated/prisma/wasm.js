@@ -125,21 +125,23 @@ exports.Prisma.ProjectScalarFieldEnum = {
   description: 'description',
   tools: 'tools',
   liveUrl: 'liveUrl',
-  createdAt: 'createdAt'
+  orderNo: 'orderNo'
 };
 
 exports.Prisma.ToolScalarFieldEnum = {
   id: 'id',
   name: 'name',
   emoji: 'emoji',
-  url: 'url'
+  url: 'url',
+  orderNo: 'orderNo'
 };
 
 exports.Prisma.ServiceScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  price: 'price'
+  price: 'price',
+  orderNo: 'orderNo'
 };
 
 exports.Prisma.SortOrder = {

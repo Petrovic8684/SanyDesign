@@ -14,7 +14,11 @@ export class ServiceService {
   }
 
   async findAll() {
-    return this.prisma.service.findMany();
+    return this.prisma.service.findMany({
+      orderBy: {
+        orderNo: 'desc',
+      },
+    });
   }
 
   async update(id: number, updateServiceDto: UpdateServiceDto) {
