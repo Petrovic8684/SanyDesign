@@ -42,7 +42,13 @@ const AdminPanel = () => {
   const [currentService, setCurrentService] = useState<Service | null>(null);
   const [currentFaq, setCurrentFaq] = useState<Faq | null>(null);
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250,
+      tolerance: 5,
+    },
+  });
+  const sensors = useSensors(useSensor(PointerSensor), touchSensor);
 
   useEffect(() => {
     fetchData();
