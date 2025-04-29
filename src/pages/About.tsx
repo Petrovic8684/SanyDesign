@@ -2,13 +2,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
-
-interface Tool {
-  id: number | undefined;
-  name: string;
-  emoji: string;
-  url: string;
-}
+import { Tool } from "../lib/types";
 
 const About = () => {
   const [tools, setTools] = useState<Tool[]>([]);

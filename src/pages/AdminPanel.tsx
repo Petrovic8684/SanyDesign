@@ -5,30 +5,22 @@ import ServiceModal from "../components/admin/ServiceModal";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { BeatLoader } from "react-spinners";
-
-interface Project {
-  id: number | undefined;
-  coverImg: string;
-  title: string;
-  images: string[];
-  description: string;
-  tools: string[];
-  liveUrl: string | null;
-}
-
-interface Tool {
-  id: number | undefined;
-  name: string;
-  emoji: string;
-  url: string;
-}
-
-interface Service {
-  id: number | undefined;
-  name: string;
-  description: string;
-  price: string;
-}
+import { Project, Tool, Service } from "../lib/types";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import SortableProjectRow from "../components/admin/SortableProjectRow";
+import SortableToolRow from "../components/admin/SortableToolRow";
+import SortableServiceRow from "../components/admin/SortableServiceRow";
 
 const AdminPanel = () => {
   const [projects, setProjects] = useState<Project[]>();
@@ -40,6 +32,8 @@ const AdminPanel = () => {
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [currentService, setCurrentService] = useState<Service | null>(null);
+
+  const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
     fetchData();
@@ -91,7 +85,7 @@ const AdminPanel = () => {
     if (data.liveUrl === "") data.liveUrl = null;
     try {
       const response = await api.post("/projects", data);
-      setProjects([...projects, response.data]);
+      setProjects([response.data, ...projects]);
     } catch (err: any) {
       console.error(err.response?.data?.message || "Failed to add project.");
     }
@@ -136,7 +130,7 @@ const AdminPanel = () => {
 
     try {
       const response = await api.post("/tools", data);
-      setTools([...tools, response.data]);
+      setTools([response.data, ...tools]);
     } catch (err: any) {
       console.error(err.response?.data?.message || "Failed to add tool.");
     }
@@ -178,7 +172,7 @@ const AdminPanel = () => {
 
     try {
       const response = await api.post("/services", data);
-      setServices([...services, response.data]);
+      setServices([response.data, ...services]);
     } catch (err: any) {
       console.error(err.response?.data?.message || "Failed to add service.");
     }
@@ -224,99 +218,67 @@ const AdminPanel = () => {
             Projects
           </h2>
 
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="w-max lg:min-w-full table-auto">
-              <thead className="bg-indigo-950 text-white">
-                <tr>
-                  <th className="p-3 text-left">Title</th>
-                  <th className="p-3 text-left">Cover</th>
-                  <th className="p-3 text-left">Images</th>
-                  <th className="p-3 text-left">Description</th>
-                  <th className="p-3 text-left">Tools</th>
-                  <th className="p-3 text-left">Live URL</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects ? (
-                  projects.map((project, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="p-3">{project.title}</td>
-                      <td className="p-3">
-                        <img
-                          src={project.coverImg}
-                          alt={project.title}
-                          className="w-20 h-20 object-cover rounded-md"
-                        />
-                      </td>
-                      <td className="p-3">
-                        <div className="flex flex-wrap gap-2">
-                          {project.images.map((img, idx) => (
-                            <img
-                              key={idx}
-                              src={img}
-                              alt={`Img ${idx + 1}`}
-                              className="w-12 h-12 object-cover rounded-md"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        {project.description && project.description.length > 20
-                          ? `${project.description.slice(0, 20)}...`
-                          : project.description}
-                      </td>
-                      <td className="p-3">
-                        {project.tools.map((tool, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-block bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs mr-2"
-                          >
-                            {tool}
-                          </span>
-                        ))}
-                      </td>
-                      <td className="p-3">
-                        {project.liveUrl ? (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-indigo-600 underline"
-                          >
-                            {project.liveUrl}
-                          </a>
-                        ) : (
-                          <p className="text-indigo-800 italic font-bold">
-                            NULL
-                          </p>
-                        )}
-                      </td>
-                      <td className="p-3 space-x-2">
-                        <button
-                          onClick={() => {
+          {projects ? (
+            <div className="overflow-x-auto bg-white rounded-lg shadow">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={({ active, over }) => {
+                  if (!active || !over || active.id === over.id || !projects)
+                    return;
+
+                  const oldIndex = projects.findIndex(
+                    (p) => p.id === active.id
+                  );
+                  const newIndex = projects.findIndex((p) => p.id === over.id);
+                  const newOrder = arrayMove(projects, oldIndex, newIndex);
+
+                  setProjects(newOrder);
+
+                  newOrder.forEach((project, index) => {
+                    api.patch(`/projects/${project.id}`, {
+                      orderNo: newOrder.length - index,
+                    });
+                  });
+                }}
+              >
+                <SortableContext
+                  items={projects.map((p) => p.id!)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <table className="w-max lg:min-w-full table-auto">
+                    <thead className="bg-indigo-950 text-white">
+                      <tr>
+                        <th className="p-3 text-left w-10"> </th>
+                        <th className="p-3 text-left">Title</th>
+                        <th className="p-3 text-left">Cover</th>
+                        <th className="p-3 text-left">Images</th>
+                        <th className="p-3 text-left">Description</th>
+                        <th className="p-3 text-left">Tools</th>
+                        <th className="p-3 text-left">Live URL</th>
+                        <th className="p-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projects.map((project) => (
+                        <SortableProjectRow
+                          key={project.id}
+                          project={project}
+                          onEdit={() => {
                             setCurrentProject(project);
                             setShowProjectModal(true);
                           }}
-                          className="text-indigo-600 cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProject(project.id)}
-                          className="text-red-600 cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <BeatLoader color="#1E1A4D" margin={10} />
-                )}
-              </tbody>
-            </table>
-          </div>
+                          onDelete={() => handleDeleteProject(project.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            </div>
+          ) : (
+            <BeatLoader color="#1E1A4D" margin={10} />
+          )}
 
           {projects && (
             <button
@@ -334,57 +296,62 @@ const AdminPanel = () => {
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-indigo-950 mb-4">Tools</h2>
 
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="w-max md:min-w-full table-auto">
-              <thead className="bg-indigo-950 text-white">
-                <tr>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Emoji</th>
-                  <th className="p-3 text-left">URL</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tools ? (
-                  tools.map((tool, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="p-3">{tool.name}</td>
-                      <td className="p-3 text-2xl">{tool.emoji}</td>
-                      <td className="p-3">
-                        <a
-                          href={tool.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 underline"
-                        >
-                          {tool.url}
-                        </a>
-                      </td>
-                      <td className="p-3 space-x-2">
-                        <button
-                          onClick={() => {
+          {tools ? (
+            <div className="overflow-x-auto bg-white rounded-lg shadow">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={({ active, over }) => {
+                  if (!active || !over || active.id === over.id || !tools)
+                    return;
+
+                  const oldIndex = tools.findIndex((t) => t.id === active.id);
+                  const newIndex = tools.findIndex((t) => t.id === over.id);
+                  const newOrder = arrayMove(tools, oldIndex, newIndex);
+
+                  setTools(newOrder);
+
+                  newOrder.forEach((tool, index) => {
+                    api.patch(`/tools/${tool.id}`, {
+                      orderNo: newOrder.length - index,
+                    });
+                  });
+                }}
+              >
+                <SortableContext
+                  items={tools.map((t) => t.id!)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <table className="w-max md:min-w-full table-auto">
+                    <thead className="bg-indigo-950 text-white">
+                      <tr>
+                        <th className="p-3 text-left w-10"> </th>
+                        <th className="p-3 text-left">Name</th>
+                        <th className="p-3 text-left">Emoji</th>
+                        <th className="p-3 text-left">URL</th>
+                        <th className="p-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tools.map((tool) => (
+                        <SortableToolRow
+                          key={tool.id}
+                          tool={tool}
+                          onEdit={() => {
                             setCurrentTool(tool);
                             setShowToolModal(true);
                           }}
-                          className="text-indigo-600 cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTool(tool.id)}
-                          className="text-red-600 cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <BeatLoader color="#1E1A4D" margin={10} />
-                )}
-              </tbody>
-            </table>
-          </div>
+                          onDelete={() => handleDeleteTool(tool.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            </div>
+          ) : (
+            <BeatLoader color="#1E1A4D" margin={10} />
+          )}
 
           {tools && (
             <button
@@ -404,52 +371,64 @@ const AdminPanel = () => {
             Services
           </h2>
 
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="w-max md:min-w-full table-auto">
-              <thead className="bg-indigo-950 text-white">
-                <tr>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Description</th>
-                  <th className="p-3 text-left">Price</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services ? (
-                  services.map((service, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="p-3">{service.name}</td>
-                      <td className="p-3">
-                        {service.description && service.description.length > 40
-                          ? `${service.description.slice(0, 40)}...`
-                          : service.description}
-                      </td>{" "}
-                      <td className="p-3">{service.price}</td>
-                      <td className="p-3 space-x-2">
-                        <button
-                          onClick={() => {
+          {services ? (
+            <div className="overflow-x-auto bg-white rounded-lg shadow">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={({ active, over }) => {
+                  if (!active || !over || active.id === over.id || !services)
+                    return;
+
+                  const oldIndex = services.findIndex(
+                    (s) => s.id === active.id
+                  );
+                  const newIndex = services.findIndex((s) => s.id === over.id);
+                  const newOrder = arrayMove(services, oldIndex, newIndex);
+
+                  setServices(newOrder);
+
+                  newOrder.forEach((service, index) => {
+                    api.patch(`/services/${service.id}`, {
+                      orderNo: newOrder.length - index,
+                    });
+                  });
+                }}
+              >
+                <SortableContext
+                  items={services.map((s) => s.id!)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <table className="w-max md:min-w-full table-auto">
+                    <thead className="bg-indigo-950 text-white">
+                      <tr>
+                        <th className="p-3 text-left"> </th>
+                        <th className="p-3 text-left">Name</th>
+                        <th className="p-3 text-left">Description</th>
+                        <th className="p-3 text-left">Price</th>
+                        <th className="p-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {services.map((service) => (
+                        <SortableServiceRow
+                          key={service.id}
+                          service={service}
+                          onEdit={() => {
                             setCurrentService(service);
                             setShowServiceModal(true);
                           }}
-                          className="text-indigo-600 cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteService(service.id)}
-                          className="text-red-600 cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <BeatLoader color="#1E1A4D" margin={10} />
-                )}
-              </tbody>
-            </table>
-          </div>
+                          onDelete={() => handleDeleteService(service.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            </div>
+          ) : (
+            <BeatLoader color="#1E1A4D" margin={10} />
+          )}
 
           {services && (
             <button

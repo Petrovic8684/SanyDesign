@@ -16,3 +16,20 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      error.response.data.message === "Invalid or expired token"
+    ) {
+      localStorage.removeItem("token");
+      window.alert("Your session has expired. Please login again.");
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);

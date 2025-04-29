@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
+import { Tool } from "../../lib/types";
 
 interface ToolModalProps {
   onClose: () => void;
-  onSubmit: (data: ToolFormData) => void;
-  initialData?: ToolFormData;
-}
-
-interface ToolFormData {
-  id: number | undefined;
-  name: string;
-  emoji: string;
-  url: string;
+  onSubmit: (data: Tool) => void;
+  initialData?: Tool;
 }
 
 const ToolModal = ({ onClose, onSubmit, initialData }: ToolModalProps) => {

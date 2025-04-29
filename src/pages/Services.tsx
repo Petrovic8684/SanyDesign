@@ -3,12 +3,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { api } from "../lib/api";
 import { GridLoader } from "react-spinners";
-
-interface Service {
-  name: string;
-  description: string;
-  price: string;
-}
+import { Service } from "../lib/types";
 
 const Services = () => {
   const [services, setServices] = useState<Service[]>();

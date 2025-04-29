@@ -4,16 +4,7 @@ import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import { api } from "../lib/api";
 import { GridLoader } from "react-spinners";
-
-interface Project {
-  id: number | undefined;
-  coverImg: string;
-  title: string;
-  images: string[];
-  description: string;
-  tools: string[];
-  liveUrl: string | null;
-}
+import { Project } from "../lib/types";
 
 const Landing = () => {
   const [projects, setProjects] = useState<Project[]>();

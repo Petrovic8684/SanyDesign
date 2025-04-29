@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import Services from "./pages/Services";
 import About from "./pages/About";
-import Project from "./pages/Project";
+import ProjectDetails from "./pages/Project";
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
       />{" "}
       <Route path="/services" element={<Services />} />
       <Route path="/about" element={<About />} />
-      <Route path="/projects/:id" element={<Project />} />
+      <Route path="/projects/:id" element={<ProjectDetails />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

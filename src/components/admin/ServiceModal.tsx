@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
+import { Service } from "../../lib/types";
 
 interface ServiceModalProps {
   onClose: () => void;
-  onSubmit: (data: ServiceFormData) => void;
-  initialData?: ServiceFormData;
-}
-
-interface ServiceFormData {
-  id: number | undefined;
-  name: string;
-  description: string;
-  price: string;
+  onSubmit: (data: Service) => void;
+  initialData?: Service;
 }
 
 const ServiceModal = ({

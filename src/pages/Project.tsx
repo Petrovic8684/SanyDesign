@@ -5,18 +5,9 @@ import Navbar from "../components/Navbar";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { api } from "../lib/api";
 import { GridLoader } from "react-spinners";
+import { Project } from "../lib/types";
 
-interface Project {
-  id: number | undefined;
-  coverImg: string;
-  title: string;
-  images: string[];
-  description: string;
-  tools: string[];
-  liveUrl: string;
-}
-
-const Project = () => {
+const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
@@ -194,4 +185,4 @@ const Project = () => {
   );
 };
 
-export default Project;
+export default ProjectDetails;

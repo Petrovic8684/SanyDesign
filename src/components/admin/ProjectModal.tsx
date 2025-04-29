@@ -1,21 +1,12 @@
 import { useState, useEffect } from "react";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
+import { Project } from "../../lib/types";
 
 interface ProjectModalProps {
   onClose: () => void;
-  onSubmit: (data: ProjectFormData) => void;
-  initialData?: ProjectFormData;
+  onSubmit: (data: Project) => void;
+  initialData?: Project;
   toolsList: string[];
-}
-
-interface ProjectFormData {
-  id: number | undefined;
-  coverImg: string;
-  title: string;
-  images: string[];
-  description: string;
-  tools: string[];
-  liveUrl: string | null;
 }
 
 const ProjectModal = ({
