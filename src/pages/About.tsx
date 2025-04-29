@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { Tool } from "../lib/types";
+import Button from "../components/Button";
+import { FaUserGraduate } from "react-icons/fa";
 
 const About = () => {
   const [tools, setTools] = useState<Tool[]>([]);
@@ -18,6 +20,10 @@ const About = () => {
     } catch (err: any) {
       console.error(err.response?.data?.message || "Failed to get tools.");
     }
+  };
+
+  const handleDownload = () => {
+    window.open(import.meta.env.VITE_CV_LINK, "_blank");
   };
 
   return (
@@ -72,13 +78,21 @@ const About = () => {
             <h2 className="text-3xl lg:text-4xl font-semibold italic">
               My Creative Process
             </h2>
-            <p className="text-lg text-indigo-100">
+            <p className="text-lg text-indigo-100 mb-8">
               From brainstorming sessions to final designs, I take a hands-on,
               collaborative approach to every project. I believe that good
               design starts with a deep understanding of the client's needs,
               followed by creative exploration, and finishing with seamless
               execution.
             </p>
+            <Button
+              text={"Download CV"}
+              colors={
+                "text-indigo-950 bg-rose-50 hover:bg-indigo-50 font-semibold"
+              }
+              action={handleDownload}
+              icon={<FaUserGraduate />}
+            />
           </div>
         </section>
 
